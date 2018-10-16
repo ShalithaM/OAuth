@@ -10,14 +10,6 @@ $ npm install
 ```sh
 $ ng serve
 ```
-* Open SynchronizeToken-Back folder
-```sh
-$ npm install
-```
-* Run the solution
-```sh
-$ node app
-```
 Open `http://localhost:4200` from the Browser
 
 
