@@ -1,0 +1,8 @@
+<div class="login-block">
+    <h1>Upload</h1>
+    <br />
+    <div class="form-group">
+        <input type="file" id="file" (change)="handleFileInput($event.target.files)" />
+    </div>
+    <button (click)="upload()">Upload to dirive</button>
+</div>

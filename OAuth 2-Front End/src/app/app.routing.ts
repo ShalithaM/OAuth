@@ -2,13 +2,12 @@ import { NgModule } from '@angular/core';
 import { CommonModule, } from '@angular/common';
 import { BrowserModule  } from '@angular/platform-browser';
 import {Routes, RouterModule, Router} from '@angular/router';
-import {AppComponent} from './app.component';
-import {ProfileComponent} from './profile/profile.component';
+import {UploadComponent} from './upload/upload.component';
 import {LoginComponent} from './login/login.component';
 
 const routes: Routes = [
     { path: 'home', component: LoginComponent },
-    { path: 'profile', component: ProfileComponent },
+    { path: 'upload', component: UploadComponent },
     { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];
 
