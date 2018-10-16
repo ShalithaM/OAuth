@@ -7,13 +7,11 @@ import { CookieService } from 'ngx-cookie-service';
 import { UploadComponent } from './upload/upload.component';
 import { RouterModule } from '@angular/router';
 import { AppRoutingModule } from './app.routing';
-import { LoginComponent } from './login/login.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     UploadComponent,
-    LoginComponent
   ],
   imports: [
     BrowserModule,

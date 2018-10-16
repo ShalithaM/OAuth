@@ -1,8 +1,17 @@
 <div class="login-block">
-    <h1>Upload</h1>
-    <br />
-    <div class="form-group">
-        <input type="file" id="file" (change)="handleFileInput($event.target.files)" />
-    </div>
-    <button (click)="upload()">Upload to dirive</button>
+  <h1>Upload Files to Google Drive</h1>
+  <div class="form-group">
+    <button id="googleBtn">Get Token</button>
+  </div>
+</div>
+<div class="login-block">
+  <h1>select file</h1>
+  <br />
+  <div class="form-group">
+    <input type="file" id="file" (change)="handleFileInput($event.target.files)" />
+  </div>
+  <button (click)="upload()">Upload to dirive</button>
+  <br />
+  <br />
+  <button (click)="remove()">Remove Token</button>
 </div>

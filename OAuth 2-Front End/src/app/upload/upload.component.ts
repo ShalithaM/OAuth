@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
-import { Router } from '@angular/router';
+declare const gapi: any;
 
 @Component({
   selector: 'app-upload',
@@ -13,86 +12,85 @@ export class UploadComponent implements OnInit {
   fileToUpload: File = null;
   filestring
 
-  constructor(private http: HttpClient, private cookieService: CookieService, private router: Router) { }
+  public auth2: any = {};
+  // **Google Sign In method**
+  public googleInit() {
+    gapi.load('auth2', () => {
+      this.auth2 = gapi.auth2.init({
+        client_id: '182411610010-q20b58dric7t8g5rjci6g7usdaipltku.apps.googleusercontent.com',
+        cookiepolicy: 'single_host_origin',
+        scope: 'profile email openid https://www.googleapis.com/auth/drive.file '
+      });
+      this.attachSignin(document.getElementById('googleBtn'));
+    });
+  }
 
-  access_token = '';
-  response = false;
+  public attachSignin(element) {
+    this.auth2.attachClickHandler(element, {},
+      (googleUser) => {
+        let profile = googleUser.getBasicProfile();
+        console.log(profile)
+        console.log(googleUser.getAuthResponse())
+        console.log(googleUser.getAuthResponse().access_token)
+
+        this.cookieService.set('TokenID', googleUser.getAuthResponse().access_token);
+        this.cookieService.set('name', profile.getName());
+        this.cookieService.set('email', profile.getEmail());
+        alert('Success \nOAuth 2 Token : ' + googleUser.getAuthResponse().access_token)
+
+      }, (error) => {
+        console.log(error);
+      });
+  }
+
+
+  constructor(private cookieService: CookieService) {
+  }
+
+  ngAfterViewInit() {
+  }
 
   ngOnInit() {
-    // this.checkToken()
+    this.googleInit();
   }
 
   handleFileInput(files: FileList) {
     this.fileToUpload = files.item(0);
-    var reader = new FileReader();
-    reader.onload = this._handleReaderLoaded.bind(this);
-    reader.readAsBinaryString(this.fileToUpload);
   }
 
-  _handleReaderLoaded(readerEvt) {
-    var binaryString = readerEvt.target.result;
-    this.filestring = btoa(binaryString);  // Converting binary string data.
+  upload() {
+
+    var fileContent = this.fileToUpload; 
+
+    var file = new Blob([fileContent], { type: this.fileToUpload.type });
+    var metadata = {
+      'name': this.fileToUpload.name, // Filename at Google Drive
+      'mimeType': this.fileToUpload.type, // mimeType at Google Drive
+      'parents': ['1GtIt5SCFMzRdjVbh9aM3GxKX8dX46rnd'], // Folder ID at Google Drive
+    };
+
+    var accessToken = this.cookieService.get('TokenID')
+    var form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', file);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('post', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart');
+    xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+    xhr.responseType = 'json';
+
+    xhr.onload = () => {
+      alert("Success")
+      console.log(xhr.response); // Retrieve uploaded file ID.
+    }
+    xhr.send(form);
   }
 
-  // upload() {
-  //   console.log(this.fileToUpload)
-
-  //     console.log("test 1")
-  //     console.log(this.fileToUpload)
-  //     const boundary = '-------314159265358979323846';
-  //     const delimiter = "\r\n--" + boundary + "\r\n";
-  //     const close_delim = "\r\n--" + boundary + "--";
-
-  //     var reader = new FileReader();
-  //     // reader.onload = this._handleReaderLoaded.bind(this);
-  //     var contentType = this.fileToUpload.type || 'application/octet-stream';
-  //     var metadata = {
-  //       'title': this.fileToUpload.name,
-  //       'mimeType': contentType
-  //     };
-
-  //     var base64Data = this.filestring
-  //     console.log(base64Data)
-
-  //     var multipartRequestBody =
-  //       delimiter +
-  //       'Content-Type: application/json\r\n\r\n' +
-  //       JSON.stringify(metadata) +
-  //       delimiter +
-  //       'Content-Type: ' + contentType + '\r\n' +
-  //       'Content-Transfer-Encoding: base64\r\n' +
-  //       '\r\n' +
-  //       base64Data +
-  //       close_delim;
-
-  //    gapi.client.request({
-  //       'path': '/upload/drive/v2/files',
-  //       'method': 'POST',
-  //       'params': { 'uploadType': 'multipart' },
-  //       'headers': {
-  //         'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
-  //       },
-  //       'body': multipartRequestBody
-  //     });
-  // }
-
-  checkToken() {
-    this.access_token = this.cookieService.get('OAuthToken');
-
-    let headers = new HttpHeaders();
-    headers = headers.set('Authorization', 'Bearer ' + this.access_token)
-
-    this.http.get('http://localhost:3000/', { headers: headers }).subscribe(
-      res => {
-        console.log(res);
-        this.response = true;
-      },
-      err => {
-        this.cookieService.delete('OAuthToken')
-        this.router.navigate(['/login']);
-        console.log(err);
-      }
-    )
+  remove() {
+    console.log("Remove Token")
+    this.cookieService.delete('TokenID')
+    alert('Token Has Removed')
   }
+
 }
 
