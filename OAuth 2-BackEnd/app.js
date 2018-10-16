@@ -1,11 +1,12 @@
 var express = require('express'),
 	bodyParser = require('body-parser'),
-	oauthserver = require('oauth2-server');
+	oauthserver = require('oauth2-server'),
+	cors = require('cors')
 
 var app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(cors());
 app.use(bodyParser.json());
 
 app.oauth = oauthserver({
@@ -17,7 +18,7 @@ app.oauth = oauthserver({
 app.all('/login', app.oauth.grant());
 
 app.get('/', app.oauth.authorise(), function (req, res) {
-	res.send('Congratulations, you are in a secret area!');
+	res.send({ status: "success" });
 });
 
 app.use(app.oauth.errorHandler());

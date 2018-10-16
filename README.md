@@ -33,12 +33,12 @@ You need to include the client credentials in request headers and the user crede
 
 * **Headers**
 	* **Authorization**: `"Basic " + clientId:secret base64'd`
-		* (for example, to use `application:secret`, you should send `Basic Y29uZmlkZW50aWFsQXBwbGljYXRpb246dG9wU2VjcmV0`)
+		* (for example, to use `application:secret`, you should send `Basic YXBwbGljYXRpb246c2VjcmV0`)
 
 	* **Content-Type**: `application/x-www-form-urlencoded`
 
 * **Body**
-	* `grant_type=client_credentials`
+	* `grant_type=password`
 	* `username=admin`
 	* `password=admin`
 
