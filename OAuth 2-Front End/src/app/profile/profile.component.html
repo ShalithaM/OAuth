@@ -1,0 +1,13 @@
+<div class="login-block">
+    <h1>Profile</h1>
+    <div class="form-group">
+    <input type="text" [(ngModel)]="profile.firstName" value="" placeholder="First Name" />
+    <input type="text" [(ngModel)]="profile.lastName" value="" placeholder="Last Name" />
+    <input type="text" [(ngModel)]="profile.address" value="" placeholder="Address" />
+    <input type="email" [(ngModel)]="profile.email" value="" placeholder="Email" />
+
+    <input type="hidden" [(ngModel)]="profile.csrf"  value="">
+    </div>
+    <button (click)="submit()">Set Prifile</button>
+    <p>{{response}}</p>
+</div>
