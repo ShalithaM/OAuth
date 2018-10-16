@@ -1,70 +1,27 @@
-var cookieParser = require('cookie-parser')
-var bodyParser = require('body-parser')
-const express = require('express')
-var cors = require('cors')
-const uuid = require('uuid/v4')
-const session = require('express-session')
-var time = require('express-timestamp')
+var express = require('express'),
+	bodyParser = require('body-parser'),
+	oauthserver = require('oauth2-server');
 
-var parseForm = bodyParser.urlencoded({ extended: false });
+var app = express();
 
-const app = express();
-app.use(cors());
-app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(bodyParser.json());
-app.use(time.init);
 
-let userlist = { user: '', sessioniD: '', token: '' };
-
-app.use(session({
-    genid: (req) => {
-        console.log('Inside the session middleware')
-        console.log(req.sessionID);
-        return uuid()
-    },
-    secret: 'This is CSRF secret $#%^*(',
-    resave: false,
-    saveUninitialized: true
-}));
-
-app.post('/login', (req, res) => {
-    if (req.body.username == "" && req.body.password == "") {
-        console.log("Authentication Failed")
-        res.send({ status: "Failed", message: "Authentication Failed", sessioniD: "" });
-    }
-    else {
-        if (req.body.username == "admin" && req.body.password == "admin") {
-            userlist = {
-                user: req.body.username,
-                sessioniD: req.sessionID,
-                token: req.sessionID + req.timestamp
-            }
-            res.send({ status: "Success", message: "Login Success", sessioniD: userlist.sessioniD });
-        }
-        else {
-            console.log("Authentication Failed")
-            res.send({ status: "Failed", message: "Authentication Failed", sessioniD: "" });
-        }
-    }
+app.oauth = oauthserver({
+	model: require('./config.js'),
+	grants: ['password', 'client_credentials'],
+	debug: true
 });
 
-app.get('/gettoken', function (req, res) {
-    res.send({ csrf: userlist.token });
+app.all('/login', app.oauth.grant());
+
+app.get('/', app.oauth.authorise(), function (req, res) {
+	res.send('Congratulations, you are in a secret area!');
 });
 
-app.post('/profile', (req, res) => {
-    if (req.headers.sid == userlist.sessioniD) {
-        if (req.body.token == userlist.token) {
-            res.send({ result: 'Profile successfully saved' });
-        }
-        else {
-            res.send({ result: 'Invalid Token' });
-        }
-    }
-    else {
-        res.send({ result: 'Invalid Cookie' });
-    }
-});
+app.use(app.oauth.errorHandler());
 
-const port = process.env.PORT || 3000;
-app.listen(3000, () => console.log(`Listening on port ${port}...`));
+app.listen(3000, function () {
+	console.log('app listening on port ' + 3000);
+});
